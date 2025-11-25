@@ -1,9 +1,9 @@
 <script>
-// @ts-nocheck
+    // @ts-nocheck
 
-    import { onMount } from 'svelte';
-    import { fireApp } from '../../firebase-config.js';
-    import { getAuth } from 'firebase/auth';
+    import { onMount } from "svelte";
+    import { fireApp } from "../../firebase-config.js";
+    import { getAuth } from "firebase/auth";
 
     let auth;
     let ui;
@@ -12,23 +12,36 @@
     onMount(() => {
         // Initialize Firebase Auth
         auth = getAuth(fireApp);
+        // Config
+        const firebaseConfig = {
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+            appId: import.meta.env.VITE_FIREBASE_APP_ID,
+            measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+        };
 
         // Load Firebase compat version first
-        const firebaseScript = document.createElement('script');
-        firebaseScript.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+        const firebaseScript = document.createElement("script");
+        firebaseScript.src =
+            "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js";
         firebaseScript.async = true;
         firebaseScript.onload = () => {
             // Initialize compat Firebase app
             firebase.initializeApp(firebaseConfig);
 
             // Load Firebase Auth compat
-            const authScript = document.createElement('script');
-            authScript.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js';
+            const authScript = document.createElement("script");
+            authScript.src =
+                "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js";
             authScript.async = true;
             authScript.onload = () => {
                 // Load FirebaseUI
-                const uiScript = document.createElement('script');
-                uiScript.src = 'https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js';
+                const uiScript = document.createElement("script");
+                uiScript.src =
+                    "https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js";
                 uiScript.async = true;
                 uiScript.onload = () => {
                     initializeFirebaseUI();
@@ -53,40 +66,45 @@
 
         const uiConfig = {
             callbacks: {
-                signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+                signInSuccessWithAuthResult: function (
+                    authResult,
+                    redirectUrl,
+                ) {
                     // User successfully signed in
-                    console.log('User signed in:', authResult.user);
+                    console.log("User signed in:", authResult.user);
                     return false; // Don't redirect automatically
                 },
-                uiShown: function() {
+                uiShown: function () {
                     // The widget is rendered
                     loading = false;
-                }
+                },
             },
-            signInFlow: 'popup',
+            signInFlow: "popup",
             signInOptions: [
                 // Email/Password
-                {provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                requireDisplayName: false},
+                {
+                    provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                    requireDisplayName: false,
+                },
                 // Google
                 firebase.auth.GoogleAuthProvider.PROVIDER_ID,
                 // Phone Number
                 {
                     provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
                     recaptchaParameters: {
-                        type: 'image',
-                        size: 'normal',
-                        badge: 'bottomleft'
+                        type: "image",
+                        size: "normal",
+                        badge: "bottomleft",
                     },
-                    defaultCountry: 'US'
-                }
+                    defaultCountry: "US",
+                },
             ],
-            tosUrl: '<your-tos-url>',
-            privacyPolicyUrl: '<your-privacy-policy-url>'
+            tosUrl: "<your-tos-url>",
+            privacyPolicyUrl: "<your-privacy-policy-url>",
         };
 
         // Start the UI
-        ui.start('#firebaseui-auth-container', uiConfig);
+        ui.start("#firebaseui-auth-container", uiConfig);
     }
 </script>
 
