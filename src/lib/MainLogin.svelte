@@ -12,6 +12,8 @@
         phoneLogin,
         verifyPhoneOtp,
         logout,
+        changePassword,
+        recoverPassword,
     } from "../login.js";
 
     let email = "";
@@ -21,7 +23,13 @@
     let user = null;
     let loading = true;
     let errorMessage = "";
+    let successMessage = "";
     let showOtpInput = false;
+    let showChangePassword = false;
+    let showForgotPassword = false;
+    let currentPassword = "";
+    let newPassword = "";
+    let recoveryEmail = "";
 
     onMount(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -73,21 +81,86 @@
     function handleLogout() {
         logout();
     }
+
+    async function handleChangePassword() {
+        errorMessage = "";
+        successMessage = "";
+        const result = await changePassword(currentPassword, newPassword);
+        if (result.success) {
+            successMessage = result.message;
+            currentPassword = "";
+            newPassword = "";
+            showChangePassword = false;
+        } else {
+            errorMessage = result.error;
+        }
+    }
+
+    async function handleRecoverPassword() {
+        errorMessage = "";
+        successMessage = "";
+        const result = await recoverPassword(recoveryEmail);
+        if (result.success) {
+            successMessage = result.message;
+            recoveryEmail = "";
+            showForgotPassword = false;
+        } else {
+            errorMessage = result.error;
+        }
+    }
 </script>
 
 <main>
     {#if loading}
         <p>Loading...</p>
     {:else if user}
-        <h2>Welcome, {user.email}!</h2>
+        <h2>Welcome, {user.email || user.phoneNumber}!</h2>
         <p>You are logged in.</p>
+        
+        {#if errorMessage}
+            <p style="color: red;">{errorMessage}</p>
+        {/if}
+        {#if successMessage}
+            <p style="color: green;">{successMessage}</p>
+        {/if}
+
         <PostView />
+
+        {#if !showChangePassword}
+            <button on:click={() => { showChangePassword = true; errorMessage = ""; successMessage = ""; }}>Change Password</button>
+        {:else}
+            <h3>Change Password</h3>
+            <form on:submit|preventDefault={handleChangePassword}>
+                <label for="current-password">Current Password:</label>
+                <input type="password" id="current-password" bind:value={currentPassword} required />
+                <br />
+                <label for="new-password">New Password:</label>
+                <input type="password" id="new-password" bind:value={newPassword} required />
+                <br />
+                <button type="submit">Update Password</button>
+                <button type="button" on:click={() => { showChangePassword = false; currentPassword = ""; newPassword = ""; }}>Cancel</button>
+            </form>
+        {/if}
 
         <button on:click={handleLogout}>Logout</button>
     {:else}
         {#if errorMessage}
             <p style="color: red;">{errorMessage}</p>
         {/if}
+        {#if successMessage}
+            <p style="color: green;">{successMessage}</p>
+        {/if}
+
+        {#if showForgotPassword}
+            <h2>Recover Password</h2>
+            <form on:submit|preventDefault={handleRecoverPassword}>
+                <label for="recovery-email">Email:</label>
+                <input type="email" id="recovery-email" bind:value={recoveryEmail} required />
+                <br />
+                <button type="submit">Send Reset Email</button>
+                <button type="button" on:click={() => { showForgotPassword = false; recoveryEmail = ""; }}>Back to Login</button>
+            </form>
+        {:else}
 
         <h2>Sign Up</h2>
         <form on:submit|preventDefault={handleSignup}>
@@ -120,6 +193,7 @@
             <br />
             <button type="submit">Login with email</button>
         </form>
+        <button type="button" on:click={() => { showForgotPassword = true; errorMessage = ""; successMessage = ""; }}>Forgot Password?</button>
 
         <h2>Or</h2>
         <button on:click={() => googleLogin()}>Sign in with Google</button>
@@ -162,6 +236,7 @@
                     }}>Back</button
                 >
             </form>
+        {/if}
         {/if}
     {/if}
     

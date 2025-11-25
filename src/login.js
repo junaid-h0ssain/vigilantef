@@ -9,11 +9,15 @@ import {
     signOut,
     RecaptchaVerifier,
     signInWithPhoneNumber,
+    updatePassword,
+    sendPasswordResetEmail,
+    reauthenticateWithCredential,
+    EmailAuthProvider,
 } from "firebase/auth";
 
 const auth = getAuth(fireApp);
 const provider = new GoogleAuthProvider();
-auth.languageCode = 'it';
+auth.languageCode = 'en';
 auth.settings.appVerificationDisabledForTesting = true;
 
 
@@ -216,18 +220,78 @@ function logout() {
     });
 }
 
-// @ts-ignore
-// function changePassword() {
-//     const newPassword = prompt('Enter new password:');
-//     if (newPassword) {
-//         auth.currentUser.updatePassword(newPassword)
-//             .then(() => {
-//                 console.log('Password updated successfully');
-//             })
-//             .catch((error) => {
-//                 console.error('Error updating password:', error);
-//             });
-//     }
-// }
+/**
+ * Change password for currently logged in user
+ * @param {string} currentPassword - User's current password for re-authentication
+ * @param {string} newPassword - New password to set
+ */
+async function changePassword(currentPassword, newPassword) {
+    const user = auth.currentUser;
+    
+    if (!user) {
+        return { success: false, error: 'No user is currently logged in' };
+    }
 
-export { auth, emailSignup, emailLogin, googleLogin, phoneLogin, verifyPhoneOtp, logout };
+    if (!user.email) {
+        return { success: false, error: 'User does not have an email associated' };
+    }
+
+    try {
+        // Re-authenticate user before changing password
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+        
+        // Update password
+        await updatePassword(user, newPassword);
+        console.log('Password updated successfully');
+        return { success: true, message: 'Password updated successfully' };
+    } catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        if (errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
+            console.error('Current password is incorrect');
+            return { success: false, error: 'Current password is incorrect' };
+        } else if (errorCode === 'auth/weak-password') {
+            console.error('New password is too weak');
+            return { success: false, error: 'New password should be at least 6 characters' };
+        } else if (errorCode === 'auth/requires-recent-login') {
+            console.error('Please log in again before changing password');
+            return { success: false, error: 'Please log in again before changing password' };
+        } else {
+            console.error(errorCode, errorMessage);
+            return { success: false, error: errorMessage };
+        }
+    }
+}
+
+/**
+ * Send password reset email to user
+ * @param {string} email - Email address to send reset link to
+ */
+async function recoverPassword(email) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        console.log('Password reset email sent to', email);
+        return { success: true, message: 'Password reset email sent. Check your inbox.' };
+    } catch (error) {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        if (errorCode === 'auth/user-not-found') {
+            console.error('No account found with this email');
+            return { success: false, error: 'No account found with this email' };
+        } else if (errorCode === 'auth/invalid-email') {
+            console.error('Invalid email address');
+            return { success: false, error: 'Invalid email address' };
+        } else if (errorCode === 'auth/too-many-requests') {
+            console.error('Too many requests. Try again later');
+            return { success: false, error: 'Too many requests. Please try again later' };
+        } else {
+            console.error(errorCode, errorMessage);
+            return { success: false, error: errorMessage };
+        }
+    }
+}
+
+export { auth, emailSignup, emailLogin, googleLogin, phoneLogin, verifyPhoneOtp, logout, changePassword, recoverPassword };
