@@ -2,7 +2,7 @@
     // @ts-nocheck
     import { onMount } from "svelte";
     import { onAuthStateChanged } from "firebase/auth";
-    import PostView from "./PostView.svelte";
+    import PostView from "./postView.svelte";
     
     import {
         auth,
