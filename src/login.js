@@ -12,30 +12,57 @@ const auth = getAuth(fireApp);
 const provider = new GoogleAuthProvider();
 
 // Email and Password Signup
+/**
+ * @param {string} email
+ * @param {string} password
+ */
 function emailSignup(email, password) {
-    createUserWithEmailAndPassword(auth, email, password)
+    return createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         // Signed up 
         const user = userCredential.user;
-        // ...
+        console.log('Signup successful:', user);
+        return { success: true, user };
     })
     .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        // ..
+        
+        if (errorCode === 'auth/email-already-in-use') {
+            console.error('This email is already registered');
+            return { success: false, error: 'This email is already registered' };
+        } else if (errorCode === 'auth/weak-password') {
+            console.error('Password should be at least 6 characters');
+            return { success: false, error: 'Password should be at least 6 characters' };
+        } else {
+            console.error(errorCode, errorMessage);
+            return { success: false, error: errorMessage };
+        }
     });
 }
 
 function emailLogin(email, password) {
-    signInWithEmailAndPassword(auth, email, password)
+    return signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
-        // ...
+        console.log('Login successful:', user);
+        return { success: true, user };
     })
     .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
+        
+        if (errorCode === 'auth/user-not-found') {
+            console.error('No account found with this email');
+            return { success: false, error: 'No account found with this email' };
+        } else if (errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-credential') {
+            console.error('Invalid email or password');
+            return { success: false, error: 'Invalid email or password' };
+        } else {
+            console.error(errorCode, errorMessage);
+            return { success: false, error: errorMessage };
+        }
     });
 }
 
@@ -70,3 +97,5 @@ function logout() {
   // An error happened.
 });
 }
+
+export { auth, emailSignup, emailLogin, googleLogin, logout };

@@ -1,47 +1,93 @@
 <script>
+// @ts-nocheck
+
+  import { onMount } from 'svelte';
+  import { onAuthStateChanged } from 'firebase/auth';
   import svelteLogo from './assets/svelte.svg'
   import viteLogo from '/vite.svg'
   import Counter from './lib/Counter.svelte'
+  import {auth, emailSignup, emailLogin, googleLogin, logout} from './login.js';
+
+  let email = '';
+  let password = '';
+  let user = null;
+  let loading = true;
+  let errorMessage = '';
+
+  onMount(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      user = currentUser;
+      loading = false;
+    });
+
+    return unsubscribe;
+  });
+
+  async function handleSignup(event) {
+    event.preventDefault();
+    errorMessage = '';
+    const result = await emailSignup(email, password);
+    if (!result.success) {
+      errorMessage = result.error;
+    }
+  }
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    errorMessage = '';
+    const result = await emailLogin(email, password);
+    if (!result.success) {
+      errorMessage = result.error;
+    }
+  }
+
+  function handleLogout() {
+    logout();
+  }
+  
 </script>
 
 <main>
-  <div>
-    <a href="https://vite.dev" target="_blank" rel="noreferrer">
-      <img src={viteLogo} class="logo" alt="Vite Logo" />
-    </a>
-    <a href="https://svelte.dev" target="_blank" rel="noreferrer">
-      <img src={svelteLogo} class="logo svelte" alt="Svelte Logo" />
-    </a>
-  </div>
-  <h1>Vite + Svelte</h1>
+    <h1>Hello to the welcome page</h1>
 
-  <div class="card">
-    <Counter />
-  </div>
+    {#if loading}
+      <p>Loading...</p>
+    {:else if user}
+      <h2>Welcome, {user.email}!</h2>
+      <p>You are logged in.</p>
+      <button on:click={handleLogout}>Logout</button>
+    {:else}
+      {#if errorMessage}
+        <p style="color: red;">{errorMessage}</p>
+      {/if}
 
-  <p>
-    Check out <a href="https://github.com/sveltejs/kit#readme" target="_blank" rel="noreferrer">SvelteKit</a>, the official Svelte app framework powered by Vite!
-  </p>
+      <h2>Sign Up</h2>
+      <form on:submit={handleSignup}>
+        <label for="signup-email">Email:</label>
+        <input type="email" id="signup-email" bind:value={email} required>
+        <br>
+        <label for="signup-password">Password:</label>
+        <input type="password" id="signup-password" bind:value={password} required>
+        <br>
+        <button type="submit">Sign up with email</button>
+      </form>
 
-  <p class="read-the-docs">
-    Click on the Vite and Svelte logos to learn more
-  </p>
-</main>
+      <h2>Login</h2>
+      <form on:submit={handleLogin}>
+        <label for="login-email">Email:</label>
+        <input type="email" id="login-email" bind:value={email} required>
+        <br>
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" bind:value={password} required>
+        <br>
+        <button type="submit">Login with email</button>
+      </form>
 
-<style>
-  .logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
-  }
-  .logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-  }
-  .logo.svelte:hover {
-    filter: drop-shadow(0 0 2em #ff3e00aa);
-  }
-  .read-the-docs {
-    color: #888;
-  }
-</style>
+      <h2>Or</h2>
+      <button on:click={() => googleLogin()}>Sign in with Google</button>
+    {/if}
+    </main>
+
+    <style>
+
+    </style>
