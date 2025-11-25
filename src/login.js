@@ -6,10 +6,12 @@ import {
     signInWithEmailAndPassword, 
     signInWithPopup,
     signOut, 
+    RecaptchaVerifier,
 } from "firebase/auth";
 
 const auth = getAuth(fireApp);
 const provider = new GoogleAuthProvider();
+auth.languageCode = 'it';
 
 // Email and Password Signup
 /**
@@ -90,12 +92,20 @@ function googleLogin() {
     });
 }
 
+function phoneSignup() {
+    
+}
+
 function logout() {
     signOut(auth).then(() => {
   // Sign-out successful.
 }).catch((error) => {
   // An error happened.
 });
+}
+
+function changePassword() {
+
 }
 
 export { auth, emailSignup, emailLogin, googleLogin, logout };

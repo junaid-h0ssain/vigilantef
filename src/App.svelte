@@ -5,7 +5,7 @@
   import { onAuthStateChanged } from 'firebase/auth';
   import svelteLogo from './assets/svelte.svg'
   import viteLogo from '/vite.svg'
-  import Counter from './lib/Counter.svelte'
+  import PostView from './lib/postView.svelte'
   import {auth, emailSignup, emailLogin, googleLogin, logout} from './login.js';
 
   let email = '';
@@ -42,7 +42,6 @@
   function handleLogout() {
     logout();
   }
-  
 </script>
 
 <main>
@@ -53,6 +52,8 @@
     {:else if user}
       <h2>Welcome, {user.email}!</h2>
       <p>You are logged in.</p>
+      <PostView />
+
       <button on:click={handleLogout}>Logout</button>
     {:else}
       {#if errorMessage}
@@ -84,6 +85,8 @@
       <h2>Or</h2>
       <button on:click={() => googleLogin()}>Sign in with Google</button>
     {/if}
+
+
     </main>
 
     <style>
