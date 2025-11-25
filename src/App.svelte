@@ -23,8 +23,7 @@
     return unsubscribe;
   });
 
-  async function handleSignup(event) {
-    event.preventDefault();
+  async function handleSignup() {
     errorMessage = '';
     const result = await emailSignup(email, password);
     if (!result.success) {
@@ -32,8 +31,7 @@
     }
   }
 
-  async function handleLogin(event) {
-    event.preventDefault();
+  async function handleLogin() {
     errorMessage = '';
     const result = await emailLogin(email, password);
     if (!result.success) {
@@ -62,7 +60,7 @@
       {/if}
 
       <h2>Sign Up</h2>
-      <form on:submit={handleSignup}>
+      <form on:submit|preventDefault={handleSignup}>
         <label for="signup-email">Email:</label>
         <input type="email" id="signup-email" bind:value={email} required>
         <br>
@@ -73,7 +71,7 @@
       </form>
 
       <h2>Login</h2>
-      <form on:submit={handleLogin}>
+      <form on:submit|preventDefault={handleLogin}>
         <label for="login-email">Email:</label>
         <input type="email" id="login-email" bind:value={email} required>
         <br>
