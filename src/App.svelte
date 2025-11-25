@@ -1,7 +1,6 @@
 <script>
-  import MainLogin from "./lib/MainLogin.svelte";
-  import AltLogin from "./lib/AltLogin.svelte";
-
+    import MainLogin from "./lib/MainLogin.svelte";
+    import AltLogin from "./lib/AltLogin.svelte";
   
 </script>
 

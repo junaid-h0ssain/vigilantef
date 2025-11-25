@@ -2,16 +2,11 @@
     // @ts-nocheck
 
     import { onMount } from "svelte";
-    import { fireApp } from "../../firebase-config.js";
-    import { getAuth } from "firebase/auth";
 
-    let auth;
     let ui;
     let loading = true;
 
     onMount(() => {
-        // Initialize Firebase Auth
-        auth = getAuth(fireApp);
         // Config
         const firebaseConfig = {
             apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -61,6 +56,13 @@
     });
 
     function initializeFirebaseUI() {
+        // Wait for DOM element to be available
+        const container = document.getElementById("firebaseui-auth-container");
+        if (!container) {
+            console.error("FirebaseUI container not found");
+            return;
+        }
+
         // Initialize the FirebaseUI Widget with compat Firebase
         ui = new firebaseui.auth.AuthUI(firebase.auth());
 
@@ -99,8 +101,9 @@
                     defaultCountry: "US",
                 },
             ],
-            tosUrl: "<your-tos-url>",
-            privacyPolicyUrl: "<your-privacy-policy-url>",
+            credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+            // tosUrl: "<your-tos-url>",
+            // privacyPolicyUrl: "<your-privacy-policy-url>",
         };
 
         // Start the UI
