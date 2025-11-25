@@ -1,0 +1,89 @@
+
+<main>
+    {#if loading}
+    <p>Loading...</p>
+  {:else if user}
+    <h2>Welcome, {user.email}!</h2>
+    <p>You are logged in.</p>
+    <PostView />
+
+    <button on:click={handleLogout}>Logout</button>
+  {:else}
+    {#if errorMessage}
+      <p style="color: red;">{errorMessage}</p>
+    {/if}
+
+    <h2>Sign Up</h2>
+    <form on:submit|preventDefault={handleSignup}>
+      <label for="signup-email">Email:</label>
+      <input type="email" id="signup-email" bind:value={email} required />
+      <br />
+      <label for="signup-password">Password:</label>
+      <input
+        type="password"
+        id="signup-password"
+        bind:value={password}
+        required
+      />
+      <br />
+      <button type="submit">Sign up with email</button>
+    </form>
+
+    <h2>Login</h2>
+    <form on:submit|preventDefault={handleLogin}>
+      <label for="login-email">Email:</label>
+      <input type="email" id="login-email" bind:value={email} required />
+      <br />
+      <label for="login-password">Password:</label>
+      <input
+        type="password"
+        id="login-password"
+        bind:value={password}
+        required
+      />
+      <br />
+      <button type="submit">Login with email</button>
+    </form>
+
+    <h2>Or</h2>
+    <button on:click={() => googleLogin()}>Sign in with Google</button>
+
+    <h2>Phone Login</h2>
+    {#if !showOtpInput}
+      <form on:submit|preventDefault={handlePhoneLogin}>
+        <label for="phone-number">Enter your number +880 1234567890</label>
+        <input
+          type="tel"
+          id="phone-number"
+          bind:value={phoneNumber}
+          placeholder="+1234567890"
+          required
+        />
+        <br />
+        <button type="submit">Send OTP</button>
+      </form>
+      <div id="recaptcha-container"></div>
+    {:else}
+      <form on:submit|preventDefault={handleVerifyOtp}>
+        <label for="otp-code">Enter OTP Code:</label>
+        <input
+          type="text"
+          id="otp-code"
+          bind:value={otpCode}
+          placeholder="000000"
+          maxlength="6"
+          required
+        />
+        <br />
+        <button type="submit">Verify OTP</button>
+        <button
+          type="button"
+          on:click={() => {
+            showOtpInput = false;
+            otpCode = "";
+          }}>Back</button
+        >
+      </form>
+    {/if}
+  {/if}
+</main>

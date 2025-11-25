@@ -13,16 +13,6 @@
         // Initialize Firebase Auth
         auth = getAuth(fireApp);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDi8CmUTRklwn2R-9P2OKmfwDtSgqBB5B0",
-            authDomain: "vigilante-e4e7b.firebaseapp.com",
-            projectId: "vigilante-e4e7b",
-            storageBucket: "vigilante-e4e7b.firebasestorage.app",
-            messagingSenderId: "563879535420",
-            appId: "1:563879535420:web:421dffde070be84d997439",
-            measurementId: "G-FD00SNBQQ0"
-        };
-
         // Load Firebase compat version first
         const firebaseScript = document.createElement('script');
         firebaseScript.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
